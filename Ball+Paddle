@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+
+<html>
+
+<script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+  <head>
+    <meta charset="UTF-8">
+    <title>Canvas</title>
+
+    <style type="text/css">
+		canvas {
+			border: 1px solid grey; 
+			display: block;
+        	margin: auto;
+		}
+    </style>
+
+  </head>
+
+  <body>
+
+    <canvas id="canvas-for-ball" width="600" height="400"></canvas>
+
+    <script type="text/javascript">
+		// Gets a handle to the element with id canvasOne.
+		var canvas = document.getElementById("canvas-for-ball");
+		// Get a 2D context for the canvas.
+		var ctx = canvas.getContext("2d");
+		
+		class Ball {
+		constructor(x, y, dx, dy, radius, color){
+			this.x = x;
+			this.y = y;
+			this.dx = dx;
+			this.dy = dy;
+			this.radius = radius;
+			this.color = color;
+		
+		}
+
+		draw(){
+			ctx.beginPath();
+			ctx.arc(this.x, this.y, this.radius, 0 , Math.PI * 2);
+			ctx.fillStyle = this.color;
+			ctx.fill();
+			ctx.closePath();
+		}
+
+		move(){
+			this.x += this.dx;
+			this.y += this.dy;
+
+			if(this.x + this.radius > canvas.width || this.x - this.radius < 0){
+				this.dx *= -1;
+			}
+			if(this.y + this.radius > canvas.height || this.y - this.radius < 0){
+				this.dy *= -1;
+			}
+
+			if(this.y + this.radius >= paddle.y &&
+				this.x >= paddle.x &&
+				this.x <= paddle.x + paddle.width
+			) {
+				this.dy *= -1;
+				this.y = paddle.y - this.radius;
+			}
+		
+				if(this.y + this.radius > canvas.height){
+					this.x = canvas.width / 2;
+					this.y = canvas.height/ 2;
+					this.dx =3;
+					this.dy =-3;
+				}
+			}
+		}
+
+		class Paddle {
+			constructor(x, y, width, height, color){
+				this.x = x;
+				this.y = y;
+				this.width = width;
+				this.height = height;
+				this.color = color;
+				this.speed = 7;
+				this.movingLeft = false;
+				this.movingRight = false;
+			}
+
+			draw(){
+				ctx.fillStyle = this.color;
+				ctx.fillRect(this.x, this.y, this.width, this.height);
+			}
+
+			move(){
+				if(this.movingLeft && this.x > 0){
+					this.x -= this.speed;
+				}
+				if(this.movingRight && this.x + this.width < canvas.width){
+					this.x += this.speed;
+				}
+			}
+		}
+
+		var ball = new Ball(100, 100, 3, 2, 10, "red");
+		var paddle = new Paddle(250, 360, 100, 15, "blue");
+		
+		//keypresses with jQuery
+		$(document.body).on('keydown', function(e) {
+			console.log(e.which);
+			switch (e.which) {
+			// key code for left arrow
+			case 37:
+				paddle.movingLeft = true;
+				break;
+
+			// key code for right arrow
+			case 39:
+				paddle.movingRight = true;
+				break;
+			}
+		});
+
+		$(document.body).on("keyup", function (e) {
+        switch (e.which) {
+          case 37:
+            paddle.movingLeft = false;
+            break;
+          case 39:
+            paddle.movingRight = false;
+            break;
+        }
+		});
+
+
+		function gameloop(){
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+			ball.move();
+			ball.draw();
+
+			paddle.move();
+			paddle.draw();
+
+			requestAnimationFrame(gameloop);
+
+		}
+
+		gameloop();
+    </script>
+
+  </body>
+
+</html>
