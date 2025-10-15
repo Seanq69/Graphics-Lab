@@ -17,6 +17,9 @@ class Paddle {
     this.y = y;
     this.radius = radius;
     this.color = color;
+    this.speed = 6;
+    this.movingUp = false;
+    this.movingDown = false;
   }
 
   draw() {
@@ -26,16 +29,21 @@ class Paddle {
     ctx.fill();
     ctx.closePath();
   }
+
+  move() {
+    if (this.movingUp && this.y - this.radius > 0) this.y -= this.speed;
+    if (this.movingDown && this.y + this.radius < canvas.height) this.y += this.speed;
+  }
 }
 
-const paddle = new Paddle(100, 200, 30, "blue");
+  const paddle = new Paddle(100, 200, 30, "blue");
 
-function loop() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  paddle.draw();
-  requestAnimationFrame(loop);
-}
-loop();
-</script>
-</body>
-</html>
+  function loop() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    paddle.draw();
+    requestAnimationFrame(loop);
+  }
+  loop();
+  </script>
+  </body>
+  </html>
