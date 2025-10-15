@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Step 9 - Remove Gravity</title>
+  <title>Step 10 - Paddle Mouse Control</title>
   <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
   <style>
     canvas {
@@ -19,7 +19,7 @@
     const canvas = document.getElementById("canvas-for-ball");
     const ctx = canvas.getContext("2d");
 
-    // ------------------ Paddle class (Circle) ------------------
+    // ------------------ Paddle class ------------------
     class Paddle {
       constructor(x, y, radius, color) {
         this.x = x;
@@ -44,7 +44,6 @@
         ctx.fill();
         ctx.closePath();
 
-        // Draw score
         ctx.font = "18px Arial";
         ctx.fillStyle = "black";
         if (this.x < canvas.width / 2) {
@@ -60,6 +59,17 @@
 
       moveDown() {
         if (this.y + this.radius < canvas.height) this.y += this.speed;
+      }
+
+      moveTo(y) {
+        // Move paddle to a specific Y-coordinate
+        if (y - this.radius < 0) {
+          this.y = this.radius;
+        } else if (y + this.radius > canvas.height) {
+          this.y = canvas.height - this.radius;
+        } else {
+          this.y = y;
+        }
       }
     }
 
@@ -90,11 +100,9 @@
       }
 
       move() {
-        // Flat movement, no gravity
         this.x += this.dx;
         this.y += this.dy;
 
-        // Bounce off top/bottom walls
         if (this.y - this.radius < 0 || this.y + this.radius > canvas.height) {
           this.dy *= -1;
         }
@@ -134,6 +142,13 @@
       }
     });
 
+    // ------------------ Mouse Control for Paddle 1 ------------------
+    $(canvas).on("mousemove", function(e) {
+      const rect = canvas.getBoundingClientRect();
+      const mouseY = e.clientY - rect.top;
+      paddle1.moveTo(mouseY);
+    });
+
     // ------------------ Game Loop ------------------
     function gameLoop() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -144,7 +159,6 @@
       paddle1.draw();
       paddle2.draw();
 
-      // Ball collision with paddles
       if (detectCollision(matchBall, paddle1)) {
         matchBall.dx *= -1;
         showCollisionMessage("Paddle 1 Hit!");
@@ -157,7 +171,6 @@
         paddle2.score++;
       }
 
-      // Ball hits left/right walls
       if (matchBall.x - matchBall.radius < 0) {
         paddle1.score--;
         matchBall.x = canvas.width / 2;
@@ -170,7 +183,6 @@
         matchBall.dx *= -1;
       }
 
-      // Draw messages
       if (showMessage) {
         ctx.font = "24px Arial";
         ctx.fillStyle = "red";
@@ -184,5 +196,3 @@
   </script>
 </body>
 </html>
-
-
