@@ -2,48 +2,125 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Step 1 - Circle Paddle</title>
+  <title>Step 3 - Add Match Ball</title>
   <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+  <style>
+    canvas {
+      border: 1px solid grey;
+      display: block;
+      margin: auto;
+    }
+  </style>
 </head>
+
 <body>
-<canvas id="canvas-for-ball" width="600" height="400" style="border:1px solid grey;display:block;margin:auto;"></canvas>
-<script>
-const canvas = document.getElementById("canvas-for-ball");
-const ctx = canvas.getContext("2d");
+  <canvas id="canvas-for-ball" width="600" height="400"></canvas>
 
-class Paddle {
-  constructor(x, y, radius, color) {
-    this.x = x;
-    this.y = y;
-    this.radius = radius;
-    this.color = color;
-    this.speed = 6;
-    this.movingUp = false;
-    this.movingDown = false;
-  }
+  <script>
+    const canvas = document.getElementById("canvas-for-ball");
+    const ctx = canvas.getContext("2d");
 
-  draw() {
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-    ctx.fillStyle = this.color;
-    ctx.fill();
-    ctx.closePath();
-  }
+    // ------------------ Paddle class (Circle) ------------------
+    class Paddle {
+      constructor(x, y, radius, color) {
+        this.x = x;
+        this.y = y;
+        this.radius = radius;
+        this.color = color;
+        this.speed = 6;
+        this.movingUp = false;
+        this.movingDown = false;
+      }
 
-  move() {
-    if (this.movingUp && this.y - this.radius > 0) this.y -= this.speed;
-    if (this.movingDown && this.y + this.radius < canvas.height) this.y += this.speed;
-  }
-}
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+        ctx.closePath();
+      }
 
-  const paddle = new Paddle(100, 200, 30, "blue");
+      move() {
+        if (this.movingUp && this.y - this.radius > 0) {
+          this.y -= this.speed;
+        }
+        if (this.movingDown && this.y + this.radius < canvas.height) {
+          this.y += this.speed;
+        }
+      }
+    }
 
-  function loop() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    paddle.draw();
-    requestAnimationFrame(loop);
-  }
-  loop();
+    // ------------------ Ball class ------------------
+    class Ball {
+      constructor(x, y, dx, dy, radius, color) {
+        this.x = x;
+        this.y = y;
+        this.dx = dx;
+        this.dy = dy;
+        this.radius = radius;
+        this.color = color;
+      }
+
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+        ctx.closePath();
+      }
+
+      move() {
+        this.x += this.dx;
+        this.y += this.dy;
+
+        // Bounce off top & bottom walls
+        if (this.y - this.radius < 0 || this.y + this.radius > canvas.height) {
+          this.dy *= -1;
+        }
+      }
+    }
+
+    // ------------------ Object creation ------------------
+    const paddle = new Paddle(50, 200, 30, "blue");
+    const matchBall = new Ball(300, 200, 3, 2, 10, "red");
+
+    // ------------------ Keyboard controls ------------------
+    $(document.body).on("keydown", function (e) {
+      switch (e.which) {
+        case 38: // up arrow
+          paddle.movingUp = true;
+          break;
+        case 40: // down arrow
+          paddle.movingDown = true;
+          break;
+      }
+    });
+
+    $(document.body).on("keyup", function (e) {
+      switch (e.which) {
+        case 38:
+          paddle.movingUp = false;
+          break;
+        case 40:
+          paddle.movingDown = false;
+          break;
+      }
+    });
+
+    // ------------------ Game loop ------------------
+    function gameLoop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      matchBall.move();
+      matchBall.draw();
+
+      paddle.move();
+      paddle.draw();
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    gameLoop();
   </script>
-  </body>
-  </html>
+</body>
+</html>
