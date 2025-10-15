@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Step 6 - Ball Rebound on Paddle Collision</title>
+  <title>No Flags Paddle Movement</title>
   <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
   <style>
     canvas {
@@ -12,7 +12,6 @@
     }
   </style>
 </head>
-
 <body>
   <canvas id="canvas-for-ball" width="600" height="400"></canvas>
 
@@ -20,16 +19,15 @@
     const canvas = document.getElementById("canvas-for-ball");
     const ctx = canvas.getContext("2d");
 
-    // ------------------ Paddle class (Circle) ------------------
+    // ------------------ Paddle class ------------------
     class Paddle {
       constructor(x, y, radius, color) {
         this.x = x;
         this.y = y;
         this.radius = radius;
         this.color = color;
-        this.speed = 6;
-        this.movingUp = false;
-        this.movingDown = false;
+        this.speed = 10;
+        this.score = 0;
       }
 
       draw() {
@@ -38,15 +36,23 @@
         ctx.fillStyle = this.color;
         ctx.fill();
         ctx.closePath();
+
+        // Draw score
+        ctx.font = "18px Arial";
+        ctx.fillStyle = "black";
+        if (this.x < canvas.width / 2) {
+          ctx.fillText("Score: " + this.score, this.x + 40, this.y - 40);
+        } else {
+          ctx.fillText("Score: " + this.score, this.x - 120, this.y - 40);
+        }
       }
 
-      move() {
-        if (this.movingUp && this.y - this.radius > 0) {
-          this.y -= this.speed;
-        }
-        if (this.movingDown && this.y + this.radius < canvas.height) {
-          this.y += this.speed;
-        }
+      moveUp() {
+        if (this.y - this.radius > 0) this.y -= this.speed;
+      }
+
+      moveDown() {
+        if (this.y + this.radius < canvas.height) this.y += this.speed;
       }
     }
 
@@ -73,7 +79,6 @@
         this.x += this.dx;
         this.y += this.dy;
 
-        // Bounce off top & bottom walls
         if (this.y - this.radius < 0 || this.y + this.radius > canvas.height) {
           this.dy *= -1;
         }
@@ -95,55 +100,72 @@
     function showCollisionMessage(text) {
       message = text;
       showMessage = true;
-      setTimeout(() => {
-        showMessage = false;
-      }, 1000); // 1 second
+      setTimeout(() => (showMessage = false), 1000);
     }
 
-    // ------------------ Object creation ------------------
-    const paddle = new Paddle(50, 200, 30, "blue");
+    // ------------------ Objects ------------------
+    const paddle1 = new Paddle(50, 200, 30, "blue");
+    const paddle2 = new Paddle(550, 200, 30, "green");
     const matchBall = new Ball(300, 200, 3, 2, 10, "red");
 
-    // ------------------ Keyboard controls ------------------
+    // ------------------ Keyboard Controls (No flags) ------------------
     $(document.body).on("keydown", function (e) {
       switch (e.which) {
-        case 38: // up arrow
-          paddle.movingUp = true;
-          break;
-        case 40: // down arrow
-          paddle.movingDown = true;
-          break;
-      }
-    });
-
-    $(document.body).on("keyup", function (e) {
-      switch (e.which) {
+        // Paddle 1 (arrow keys)
         case 38:
-          paddle.movingUp = false;
+          paddle1.moveUp();
           break;
         case 40:
-          paddle.movingDown = false;
+          paddle1.moveDown();
+          break;
+
+        // Paddle 2 (W/S)
+        case 87:
+          paddle2.moveUp();
+          break;
+        case 83:
+          paddle2.moveDown();
           break;
       }
     });
 
-    // ------------------ Game loop ------------------
+    // ------------------ Game Loop ------------------
     function gameLoop() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       matchBall.move();
       matchBall.draw();
 
-      paddle.move();
-      paddle.draw();
+      paddle1.draw();
+      paddle2.draw();
 
-      // Detect collision with paddle
-      if (detectCollision(matchBall, paddle)) {
-        matchBall.dx *= -1; // reverse horizontal direction
-        showCollisionMessage("Rebound!");
+      // Detect collisions
+      if (detectCollision(matchBall, paddle1)) {
+        matchBall.dx *= -1;
+        showCollisionMessage("Paddle 1 Hit!");
+        paddle1.score++;
       }
 
-      // Draw message if active
+      if (detectCollision(matchBall, paddle2)) {
+        matchBall.dx *= -1;
+        showCollisionMessage("Paddle 2 Hit!");
+        paddle2.score++;
+      }
+
+      // Ball hits walls (lose point)
+      if (matchBall.x - matchBall.radius < 0) {
+        paddle1.score--;
+        matchBall.x = canvas.width / 2;
+        matchBall.dx *= -1;
+      }
+
+      if (matchBall.x + matchBall.radius > canvas.width) {
+        paddle2.score--;
+        matchBall.x = canvas.width / 2;
+        matchBall.dx *= -1;
+      }
+
+      // Display messages
       if (showMessage) {
         ctx.font = "24px Arial";
         ctx.fillStyle = "red";
@@ -157,3 +179,4 @@
   </script>
 </body>
 </html>
+
