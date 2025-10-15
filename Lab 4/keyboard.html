@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>No Flags Paddle Movement</title>
+  <title>Step 8 - Radial Gradient Colors</title>
   <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
   <style>
     canvas {
@@ -19,21 +19,29 @@
     const canvas = document.getElementById("canvas-for-ball");
     const ctx = canvas.getContext("2d");
 
-    // ------------------ Paddle class ------------------
+    // ------------------ Paddle class (Circle) ------------------
     class Paddle {
       constructor(x, y, radius, color) {
         this.x = x;
         this.y = y;
         this.radius = radius;
         this.color = color;
-        this.speed = 10;
+        this.speed = 6;
         this.score = 0;
       }
 
       draw() {
+        // Create radial gradient
+        const gradient = ctx.createRadialGradient(
+          this.x, this.y, this.radius / 4,
+          this.x, this.y, this.radius
+        );
+        gradient.addColorStop(0, "white");
+        gradient.addColorStop(1, this.color);
+
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.fillStyle = this.color;
+        ctx.fillStyle = gradient;
         ctx.fill();
         ctx.closePath();
 
@@ -68,9 +76,16 @@
       }
 
       draw() {
+        const gradient = ctx.createRadialGradient(
+          this.x, this.y, this.radius / 4,
+          this.x, this.y, this.radius
+        );
+        gradient.addColorStop(0, "white");
+        gradient.addColorStop(1, this.color);
+
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.fillStyle = this.color;
+        ctx.fillStyle = gradient;
         ctx.fill();
         ctx.closePath();
       }
@@ -108,24 +123,16 @@
     const paddle2 = new Paddle(550, 200, 30, "green");
     const matchBall = new Ball(300, 200, 3, 2, 10, "red");
 
-    // ------------------ Keyboard Controls (No flags) ------------------
+    // ------------------ Keyboard Controls ------------------
     $(document.body).on("keydown", function (e) {
       switch (e.which) {
         // Paddle 1 (arrow keys)
-        case 38:
-          paddle1.moveUp();
-          break;
-        case 40:
-          paddle1.moveDown();
-          break;
+        case 38: paddle1.moveUp(); break;
+        case 40: paddle1.moveDown(); break;
 
         // Paddle 2 (W/S)
-        case 87:
-          paddle2.moveUp();
-          break;
-        case 83:
-          paddle2.moveDown();
-          break;
+        case 87: paddle2.moveUp(); break;
+        case 83: paddle2.moveDown(); break;
       }
     });
 
@@ -139,7 +146,7 @@
       paddle1.draw();
       paddle2.draw();
 
-      // Detect collisions
+      // Ball collision with paddles
       if (detectCollision(matchBall, paddle1)) {
         matchBall.dx *= -1;
         showCollisionMessage("Paddle 1 Hit!");
@@ -152,7 +159,7 @@
         paddle2.score++;
       }
 
-      // Ball hits walls (lose point)
+      // Ball hits left/right walls
       if (matchBall.x - matchBall.radius < 0) {
         paddle1.score--;
         matchBall.x = canvas.width / 2;
@@ -165,7 +172,7 @@
         matchBall.dx *= -1;
       }
 
-      // Display messages
+      // Draw messages
       if (showMessage) {
         ctx.font = "24px Arial";
         ctx.fillStyle = "red";
