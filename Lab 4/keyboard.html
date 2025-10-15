@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Step 5 - Collision Message</title>
+  <title>Step 6 - Ball Rebound on Paddle Collision</title>
   <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
   <style>
     canvas {
@@ -97,7 +97,7 @@
       showMessage = true;
       setTimeout(() => {
         showMessage = false;
-      }, 1000); // stays for 1 second
+      }, 1000); // 1 second
     }
 
     // ------------------ Object creation ------------------
@@ -137,16 +137,17 @@
       paddle.move();
       paddle.draw();
 
-      // Detect collision
+      // Detect collision with paddle
       if (detectCollision(matchBall, paddle)) {
-        showCollisionMessage("Collision Detected!");
+        matchBall.dx *= -1; // reverse horizontal direction
+        showCollisionMessage("Rebound!");
       }
 
       // Draw message if active
       if (showMessage) {
         ctx.font = "24px Arial";
         ctx.fillStyle = "red";
-        ctx.fillText(message, canvas.width / 2 - 100, 50);
+        ctx.fillText(message, canvas.width / 2 - 60, 50);
       }
 
       requestAnimationFrame(gameLoop);
@@ -156,4 +157,3 @@
   </script>
 </body>
 </html>
-
