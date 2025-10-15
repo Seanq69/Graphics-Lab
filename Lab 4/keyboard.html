@@ -2,208 +2,40 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Canvas - Paddle Collision Game</title>
+  <title>Step 1 - Circle Paddle</title>
   <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
-  <style>
-    canvas {
-      border: 1px solid grey;
-      display: block;
-      margin: auto;
-      background: #f5f5f5;
-    }
-  </style>
 </head>
 <body>
-  <canvas id="canvas-for-ball" width="600" height="400"></canvas>
+<canvas id="canvas-for-ball" width="600" height="400" style="border:1px solid grey;display:block;margin:auto;"></canvas>
+<script>
+const canvas = document.getElementById("canvas-for-ball");
+const ctx = canvas.getContext("2d");
 
-  <script>
-    const canvas = document.getElementById("canvas-for-ball");
-    const ctx = canvas.getContext("2d");
+class Paddle {
+  constructor(x, y, radius, color) {
+    this.x = x;
+    this.y = y;
+    this.radius = radius;
+    this.color = color;
+  }
 
-    // ==== BALL CLASS ====
-    class Ball {
-      constructor(x, y, dx, dy, radius, color) {
-        this.x = x;
-        this.y = y;
-        this.dx = dx;
-        this.dy = dy;
-        this.radius = radius;
-        this.color = color;
-      }
+  draw() {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+    ctx.fillStyle = this.color;
+    ctx.fill();
+    ctx.closePath();
+  }
+}
 
-      draw() {
-        // Add color radial gradient
-        const gradient = ctx.createRadialGradient(
-          this.x, this.y, this.radius / 4,
-          this.x, this.y, this.radius
-        );
-        gradient.addColorStop(0, "white");
-        gradient.addColorStop(1, this.color);
+const paddle = new Paddle(100, 200, 30, "blue");
 
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.fillStyle = gradient;
-        ctx.fill();
-        ctx.closePath();
-      }
-
-      move() {
-        this.x += this.dx;
-        this.y += this.dy;
-
-        // Bounce off top/bottom walls
-        if (this.y - this.radius < 0) {
-          this.y = this.radius;
-          this.dy *= -1;
-        }
-        if (this.y + this.radius > canvas.height) {
-          this.y = canvas.height - this.radius;
-          this.dy *= -1;
-        }
-
-        // Lose points if the ball goes behind a paddle
-        if (this.x - this.radius < 0) {
-          paddle2.score--;
-          this.reset();
-        } else if (this.x + this.radius > canvas.width) {
-          paddle1.score--;
-          this.reset();
-        }
-      }
-
-      reset() {
-        // Reset ball to center when it goes off-screen
-        this.x = canvas.width / 2;
-        this.y = canvas.height / 2;
-        this.dx *= -1;
-      }
-    }
-
-    // ==== PADDLE CLASS ====
-    class Paddle {
-      constructor(x, y, radius, color) {
-        this.x = x;
-        this.y = y;
-        this.radius = radius;
-        this.color = color;
-        this.speed = 7;
-        this.movingUp = false;
-        this.movingDown = false;
-        this.score = 0;
-      }
-
-      draw() {
-        // Draw as a circle with radial gradient
-        const gradient = ctx.createRadialGradient(
-          this.x, this.y, this.radius / 3,
-          this.x, this.y, this.radius
-        );
-        gradient.addColorStop(0, "white");
-        gradient.addColorStop(1, this.color);
-
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.fillStyle = gradient;
-        ctx.fill();
-        ctx.closePath();
-      }
-
-      move() {
-        if (this.movingUp && this.y - this.radius > 0) {
-          this.y -= this.speed;
-        }
-        if (this.movingDown && this.y + this.radius < canvas.height) {
-          this.y += this.speed;
-        }
-      }
-    }
-
-    // ==== COLLISION DETECTION FUNCTION ====
-    function detectCollision(ball, paddle) {
-      const dx = ball.x - paddle.x;
-      const dy = ball.y - paddle.y;
-      const distance = Math.sqrt(dx * dx + dy * dy);
-      return distance < ball.radius + paddle.radius;
-    }
-
-    // ==== CREATE OBJECTS ====
-    const ball = new Ball(300, 200, 3, 2, 10, "red");
-    const paddle1 = new Paddle(50, 200, 30, "blue");   // Left paddle
-    const paddle2 = new Paddle(550, 200, 30, "green"); // Right paddle
-
-    // ==== MESSAGE HANDLING ====
-    let collisionMessage = "";
-    let messageTimer = 0;
-
-    function showMessage(msg) {
-      collisionMessage = msg;
-      messageTimer = Date.now();
-    }
-
-    // ==== KEYBOARD CONTROLS ====
-    $(document.body).on("keydown", function (e) {
-      switch (e.which) {
-        // Paddle 1 (W/S)
-        case 87: paddle1.movingUp = true; break;
-        case 83: paddle1.movingDown = true; break;
-
-        // Paddle 2 (Up/Down arrows)
-        case 38: paddle2.movingUp = true; break;
-        case 40: paddle2.movingDown = true; break;
-      }
-    });
-
-    $(document.body).on("keyup", function (e) {
-      switch (e.which) {
-        case 87: paddle1.movingUp = false; break;
-        case 83: paddle1.movingDown = false; break;
-        case 38: paddle2.movingUp = false; break;
-        case 40: paddle2.movingDown = false; break;
-      }
-    });
-
-    // ==== MAIN GAME LOOP ====
-    function gameLoop() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // Move objects
-      ball.move();
-      paddle1.move();
-      paddle2.move();
-
-      // Collision detection and response
-      if (detectCollision(ball, paddle1)) {
-        ball.dx = Math.abs(ball.dx); // Bounce to the right
-        paddle1.score++;
-        showMessage("Collision with BLUE Paddle!");
-      } else if (detectCollision(ball, paddle2)) {
-        ball.dx = -Math.abs(ball.dx); // Bounce to the left
-        paddle2.score++;
-        showMessage("Collision with GREEN Paddle!");
-      }
-
-      // Draw everything
-      ball.draw();
-      paddle1.draw();
-      paddle2.draw();
-
-      // Draw scores
-      ctx.font = "18px Arial";
-      ctx.fillStyle = "black";
-      ctx.fillText("Blue Score: " + paddle1.score, 50, 30);
-      ctx.fillText("Green Score: " + paddle2.score, 400, 30);
-
-      // Show collision message for 1 second
-      if (collisionMessage && Date.now() - messageTimer < 1000) {
-        ctx.font = "20px Arial";
-        ctx.fillStyle = "red";
-        ctx.fillText(collisionMessage, canvas.width / 2 - 120, canvas.height / 2 - 100);
-      }
-
-      requestAnimationFrame(gameLoop);
-    }
-
-    gameLoop();
-  </script>
+function loop() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  paddle.draw();
+  requestAnimationFrame(loop);
+}
+loop();
+</script>
 </body>
 </html>
