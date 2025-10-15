@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Step 3 - Add Match Ball</title>
+  <title>Step 4 - Collision Detection</title>
   <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
   <style>
     canvas {
@@ -80,6 +80,16 @@
       }
     }
 
+    // ------------------ Collision Detection ------------------
+    function detectCollision(ball, paddle) {
+      const dx = ball.x - paddle.x;
+      const dy = ball.y - paddle.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      // Returns true if the distance is smaller than sum of radii
+      return distance < ball.radius + paddle.radius;
+    }
+
     // ------------------ Object creation ------------------
     const paddle = new Paddle(50, 200, 30, "blue");
     const matchBall = new Ball(300, 200, 3, 2, 10, "red");
@@ -117,6 +127,13 @@
       paddle.move();
       paddle.draw();
 
+      // Collision detection example
+      if (detectCollision(matchBall, paddle)) {
+        ctx.font = "20px Arial";
+        ctx.fillStyle = "red";
+        ctx.fillText("Collision!", canvas.width / 2 - 50, 50);
+      }
+
       requestAnimationFrame(gameLoop);
     }
 
@@ -124,3 +141,4 @@
   </script>
 </body>
 </html>
+
