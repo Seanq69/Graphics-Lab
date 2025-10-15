@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Step 8 - Radial Gradient Colors</title>
+  <title>Step 9 - Remove Gravity</title>
   <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
   <style>
     canvas {
@@ -31,7 +31,6 @@
       }
 
       draw() {
-        // Create radial gradient
         const gradient = ctx.createRadialGradient(
           this.x, this.y, this.radius / 4,
           this.x, this.y, this.radius
@@ -91,9 +90,11 @@
       }
 
       move() {
+        // Flat movement, no gravity
         this.x += this.dx;
         this.y += this.dy;
 
+        // Bounce off top/bottom walls
         if (this.y - this.radius < 0 || this.y + this.radius > canvas.height) {
           this.dy *= -1;
         }
@@ -126,11 +127,8 @@
     // ------------------ Keyboard Controls ------------------
     $(document.body).on("keydown", function (e) {
       switch (e.which) {
-        // Paddle 1 (arrow keys)
         case 38: paddle1.moveUp(); break;
         case 40: paddle1.moveDown(); break;
-
-        // Paddle 2 (W/S)
         case 87: paddle2.moveUp(); break;
         case 83: paddle2.moveDown(); break;
       }
@@ -186,4 +184,5 @@
   </script>
 </body>
 </html>
+
 
